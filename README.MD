@@ -1,0 +1,7 @@
+# Pract R1
+
+## ScrenShots
+
+![1697782867452](image/README/1697782867452.png)
+
+![1697782895498](image/README/1697782895498.png)
