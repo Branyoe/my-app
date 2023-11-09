@@ -24,7 +24,8 @@ export default class MyInput extends Component{
   render() {
     return (
       <PaperTextInput
-        label="Type here"
+        label="email"
+        secureTextEntry
         onChangeText={this.props.handleChange}
         value={this.props.value}
         mode="outlined"
@@ -37,6 +38,6 @@ export default class MyInput extends Component{
 const styles = StyleSheet.create({
   input: {
     marginVertical: 10,
-    width: "100%"
+    width: "100%",
   },
 });

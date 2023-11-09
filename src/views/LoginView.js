@@ -3,18 +3,17 @@ import { StatusBar } from 'expo-status-bar';
 import {
   StyleSheet,
   View,
-  Switch,
+  Image
 } from 'react-native';
 import {
-  PaperProvider,
   Button as PaperButton,
   Text as PaperText,
-  Appbar as PaperAppbar,
+  TextInput,
 } from 'react-native-paper';
 import {
-  MyDialog,
-  MyInput
+  MyDialog
 } from '../components';
+import { splash_png } from "../../assets/favicon.png";
 
 export default class LoginView extends Component {
   
@@ -23,11 +22,21 @@ export default class LoginView extends Component {
     this.state = {
       switchValue: false,
       inputValue: "",
-      isDialogVisible: false
+      isDialogVisible: false,
+      seePasword: true,
+      emailValue: "",
+      passwordValue: "",
+      dialogMessage: {},
     }
   }
 
   //SetStateMethods
+  toggleSeePasword = (prevState) => {
+    this.setState(({
+      seePasword: !prevState
+    }))
+  }
+
   toggleSwitch = (prevState) => {
     this.setState(({
       switchValue: !prevState
@@ -35,9 +44,15 @@ export default class LoginView extends Component {
     // console.warn(!prevState);
   }
 
-  handleInputChange = (newValue) => {
+  handleEmailValueChange = (newValue) => {
     this.setState({
-      textValue: newValue
+      emailValue: newValue
+    });
+  }
+
+  handlePasswordValueChange = (newValue) => {
+    this.setState({
+      passwordValue: newValue
     });
   }
 
@@ -46,73 +61,108 @@ export default class LoginView extends Component {
       isDialogVisible: !this.state.isDialogVisible
     });
   }
-  
-  //Methods
-  // showAlert = (alertText) => {
-  //   Alert.alert('Input value', alertText, [
-  //     {
-  //       text: 'Cancel',
-  //       onPress: () => console.log('Cancel Pressed'),
-  //       style: 'cancel',
-  //     },
-  //     {text: 'OK', onPress: () => console.log('OK Pressed')},
-  //   ]);
-  // }
+
+  setDialogMessage = (message) => {
+    this.setState({
+      dialogMessage: message
+    });
+  }
+
+  //methods
+  validateEmail = (email) => {
+    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return regex.test(email);
+  }
+
+  validatePassword = (password) => {
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return regex.test(password);
+  }
+
+  generateDialogMessage = () => {
+    let message = "";
+    if (!this.validateEmail(this.state.emailValue)) {
+      message += "Email is not valid\n";
+    }
+    if (!this.validatePassword(this.state.passwordValue)) {
+      message += "Password is not valid\n";
+    }
+    return message;
+  }
+
+  formValidation = () => {
+    let message = this.generateDialogMessage();
+    if (message === "") {
+      this.setDialogMessage({
+        title: "Welcome",
+        message: "Login successfull"
+      });
+    } else {
+      this.setDialogMessage({
+        title: "Login failed",
+        message: message
+      });
+    }
+    this.setIsDialogVisble();
+  }
 
   render() {
     return (
       //Provides the theme to all components
-      <PaperProvider> 
-        <PaperAppbar.Header> 
-          <PaperAppbar.Content title="Practica R1" />
-        </PaperAppbar.Header>
 
-        {/* //Main content   */}
-        <View style={styles.container}>
+      <View style={styles.container}>
 
-          <PaperText variant='headlineLarge'>
-            Yoél Hernández
-          </PaperText>
+        <Image
+          style={{width: 100, height: 100, marginBottom: 50}}
+          source={require("../../assets/atom.png")}
+        />
+        
+        <PaperText variant='headlineLarge' style={styles.title}>
+          Login
+        </PaperText>
 
-          {/* custom component */}
-          <MyInput
-            handleChange={this.handleInputChange}
-            value={this.state.textValue}
-          />
-          <PaperButton
-            mode="contained"
-            // onPress={() => this.showAlert(this.state.textValue)}
-            onPress={() => this.setIsDialogVisble()}
-            title="Lear more"
-            accessibilityLabel="Learn more about this purple button"
-          >
-            See more
-          </PaperButton>
+        <TextInput
+          label="Email"
+          onChangeText={this.handleEmailValueChange}
+          value={this.state.emailValue}
+          mode="outlined"
+          style={styles.input}
+        />
 
-          <Switch
-            onValueChange={() => this.toggleSwitch(this.state.switchValue)}
-            value={this.state.switchValue}
-          />
-
-          {/* conditional rendering */}
-          {this.state.switchValue && (
-              <View>
-                <PaperText variant='headlineSmall'>
-                  {this.state.switchValue ? "Switch is ON" : "Switch is OFF"}
-                </PaperText>
-              </View>
-            )
+        <TextInput
+          label="Password"
+          secureTextEntry={this.state.seePasword}
+          onChangeText={this.handlePasswordValueChange}
+          value={this.state.passwordValue}
+          mode="outlined"
+          style={styles.input}
+          right={
+            <TextInput.Icon
+              icon={this.state.seePasword ? "eye" : "eye-off"}
+              onPress={() => {
+                this.toggleSeePasword(this.state.seePasword);
+              }}
+            />
           }
+        />
+        
+        <PaperButton
+          mode="contained"
+          onPress={() => this.formValidation()}
+          title="Lear more"
+          accessibilityLabel="Learn more about this purple button"
+          style={styles.submitButton}
+        >
+          Login
+        </PaperButton>
 
-          {/* custom component */}
-          <MyDialog
-            isVisible={this.state.isDialogVisible}
-            setIsVisible={this.setIsDialogVisble}
-            content={this.state.textValue}
-          />
-          <StatusBar style="auto" />
-        </View>
-      </PaperProvider>
+        <MyDialog
+          isVisible={this.state.isDialogVisible}
+          setIsVisible={this.setIsDialogVisble}
+          content={this.state.dialogMessage}
+        />
+        <StatusBar style="auto" />
+      </View>
     );
   }
 }
@@ -126,4 +176,13 @@ const styles = StyleSheet.create({
     padding: 15,
     gap: 10,
   },
+  input: {
+    width: "100%",
+  },
+  submitButton: {
+    marginTop: 10,
+  },
+  title: {
+    marginBottom: 10,
+  }
 });

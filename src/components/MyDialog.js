@@ -17,10 +17,10 @@ export default class MyDialog extends Component {
         visible={this.props.isVisible}
         onDismiss={this.props.setIsVisible}
       >
-        <Dialog.Title>Yoel</Dialog.Title>
+        <Dialog.Title>{this.props.content.title}</Dialog.Title>
         <Dialog.Content>
           <Text variant="bodyMedium">
-            Writed text: {this.props.content}
+            {this.props.content.message}
           </Text>
         </Dialog.Content>
         <Dialog.Actions>
