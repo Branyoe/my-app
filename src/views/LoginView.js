@@ -6,42 +6,33 @@ import {
   Image
 } from 'react-native';
 import {
-  Button as PaperButton,
   Text as PaperText,
-  TextInput,
 } from 'react-native-paper';
-import {
-  MyDialog
-} from '../components';
-import { splash_png } from "../../assets/favicon.png";
+import { ErrorDialog, LoginForm } from '../components/LoginComponents';
 
 export default class LoginView extends Component {
   
   constructor(props) {
     super(props);
     this.state = {
-      switchValue: false,
-      inputValue: "",
       isDialogVisible: false,
-      seePasword: true,
       emailValue: "",
       passwordValue: "",
-      dialogMessage: {},
+      formErrors: {}
     }
   }
 
-  //SetStateMethods
-  toggleSeePasword = (prevState) => {
-    this.setState(({
-      seePasword: !prevState
-    }))
+  componentDidUpdate = (prevProps, prevState) => {
+    if (prevState.formErrors !== this.state.formErrors) {
+      this.setIsDialogVisble();
+    }
   }
 
-  toggleSwitch = (prevState) => {
-    this.setState(({
-      switchValue: !prevState
-    }))
-    // console.warn(!prevState);
+  //state setters
+  setFormErrors = (newFormErrors) => {
+    this.setState({
+      formErrors: newFormErrors
+    });
   }
 
   handleEmailValueChange = (newValue) => {
@@ -61,105 +52,36 @@ export default class LoginView extends Component {
       isDialogVisible: !this.state.isDialogVisible
     });
   }
-
-  setDialogMessage = (message) => {
-    this.setState({
-      dialogMessage: message
-    });
-  }
-
-  //methods
-  validateEmail = (email) => {
-    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    return regex.test(email);
-  }
-
-  validatePassword = (password) => {
-    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    return regex.test(password);
-  }
-
-  generateDialogMessage = () => {
-    let message = "";
-    if (!this.validateEmail(this.state.emailValue)) {
-      message += "Email is not valid\n";
+  
+  getLoginFormProps = () => {
+    return {
+      emailValue: this.state.emailValue,
+      passwordValue: this.state.passwordValue,
+      handleEmailValueChange: this.handleEmailValueChange,
+      handlePasswordValueChange: this.handlePasswordValueChange,
+      setFormErrors: this.setFormErrors
     }
-    if (!this.validatePassword(this.state.passwordValue)) {
-      message += "Password is not valid\n";
-    }
-    return message;
-  }
-
-  formValidation = () => {
-    let message = this.generateDialogMessage();
-    if (message === "") {
-      this.setDialogMessage({
-        title: "Welcome",
-        message: "Login successfull"
-      });
-    } else {
-      this.setDialogMessage({
-        title: "Login failed",
-        message: message
-      });
-    }
-    this.setIsDialogVisble();
   }
 
   render() {
     return (
-      //Provides the theme to all components
-
       <View style={styles.container}>
 
         <Image
-          style={{width: 100, height: 100, marginBottom: 50}}
-          source={require("../../assets/atom.png")}
+          style={{width: 100, height: 100, marginBottom: 50, borderRadius: 10}}
+          source={require("../../assets/musicLogo.png")}
         />
         
         <PaperText variant='headlineLarge' style={styles.title}>
           Login
         </PaperText>
 
-        <TextInput
-          label="Email"
-          onChangeText={this.handleEmailValueChange}
-          value={this.state.emailValue}
-          mode="outlined"
-          style={styles.input}
-        />
+        <LoginForm {...this.getLoginFormProps()}/>
 
-        <TextInput
-          label="Password"
-          secureTextEntry={this.state.seePasword}
-          onChangeText={this.handlePasswordValueChange}
-          value={this.state.passwordValue}
-          mode="outlined"
-          style={styles.input}
-          right={
-            <TextInput.Icon
-              icon={this.state.seePasword ? "eye" : "eye-off"}
-              onPress={() => {
-                this.toggleSeePasword(this.state.seePasword);
-              }}
-            />
-          }
-        />
-        
-        <PaperButton
-          mode="contained"
-          onPress={() => this.formValidation()}
-          title="Lear more"
-          accessibilityLabel="Learn more about this purple button"
-          style={styles.submitButton}
-        >
-          Login
-        </PaperButton>
-
-        <MyDialog
+        <ErrorDialog
           isVisible={this.state.isDialogVisible}
           setIsVisible={this.setIsDialogVisble}
-          content={this.state.dialogMessage}
+          errors={this.state.formErrors}
         />
         <StatusBar style="auto" />
       </View>
